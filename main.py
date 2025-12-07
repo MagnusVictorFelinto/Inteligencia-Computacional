@@ -1,29 +1,33 @@
+import os
+import requests
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import pipeline
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Minha API de Classificação de IA")
 
-# --- CONFIGURAÇÃO DO MODELO (MUDANÇA AQUI) ---
-# Antes era: CAMINHO_MODELO = "./modelo_final"
-# Agora apontamos para o seu repositório na nuvem:
-CAMINHO_MODELO = "MagnusFelintoMV/ClassificacaoEmail"
+# --- CONFIGURAÇÃO DA API HUGGING FACE ---
+# Seu modelo hospedado:
+API_URL = "https://api-inference.huggingface.co/models/MagnusFelintoMV/ClassificacaoEmail"
 
-print(f"Carregando o modelo de {CAMINHO_MODELO}...")
-print("Nota: Na primeira vez, isso pode demorar alguns minutos pois fará o download (1GB).")
+# ⚠️ SEGURANÇA: O ideal é ler de uma variável de ambiente no Render.
+# Se quiser testar local, crie um arquivo .env com: HF_TOKEN=hf_sua_chave
+HF_TOKEN = os.getenv("HF_TOKEN") 
 
-try:
-    # A biblioteca vai baixar os arquivos do Hugging Face automaticamente e colocar em cache
-    classificador_ia = pipeline(task="text-classification", model=CAMINHO_MODELO, tokenizer=CAMINHO_MODELO)
-    print("Modelo de Classificação carregado com sucesso da nuvem!")
-except Exception as e:
-    print(f"Erro fatal ao carregar o modelo: {e}")
-    classificador_ia = None
+headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 class ComentarioInput(BaseModel):
     texto: str
 
+def query_huggingface(payload):
+    """Envia o texto para a API do Hugging Face e retorna a resposta JSON."""
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+    
 # --- ROTA DA API ---
 @app.post("/analisar-comentario")
 def analisar_comentario(dados: ComentarioInput):
@@ -373,9 +377,7 @@ def home():
 
 # ... (todo o seu código acima) ...
 
-import uvicorn
-import os
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
