@@ -15,7 +15,7 @@ app = FastAPI(title="Minha API de Classificação de IA")
 API_URL = "https://api-inference.huggingface.co/models/MagnusFelintoMV/ClassificacaoEmail"
 
 # Pega o token do ambiente (Render) ou usa None se não tiver
-HF_TOKEN = "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" # os.getenv("HF_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN")
 headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 class ComentarioInput(BaseModel):
@@ -176,3 +176,4 @@ def home():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
