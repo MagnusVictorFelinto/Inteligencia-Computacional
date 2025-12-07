@@ -1,0 +1,17 @@
+# Ignora o ambiente virtual
+venv/
+env/
+.env
+./venv
+# Ignora arquivos compilados do Python (lixo)
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignora a pasta do modelo (Geralmente modelos são pesados demais para o Git)
+# Se você quiser versionar o modelo, remova a linha abaixo.
+modelo_final/
+modelo_treinado/
+
+# Ignora arquivos de sistema
+.DS_Store
