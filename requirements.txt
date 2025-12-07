@@ -1,1 +1,5 @@
-bla
+fastapi
+uvicorn
+pydantic
+transformers
+torch
