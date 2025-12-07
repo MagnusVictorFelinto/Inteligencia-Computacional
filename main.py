@@ -369,3 +369,13 @@ def home():
     </html>
     """
     return html_content
+
+
+# ... (todo o seu código acima) ...
+
+import uvicorn
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
