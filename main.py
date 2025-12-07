@@ -3,18 +3,20 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from transformers import pipeline
 
-
 app = FastAPI(title="Minha API de Classificação de IA")
 
-# --- CONFIGURAÇÃO DO MODELO ---
-CAMINHO_MODELO = "./modelo_final" 
+# --- CONFIGURAÇÃO DO MODELO (MUDANÇA AQUI) ---
+# Antes era: CAMINHO_MODELO = "./modelo_final"
+# Agora apontamos para o seu repositório na nuvem:
+CAMINHO_MODELO = "MagnusFelintoMV/ClassificacaoEmail"
 
-print("Carregando o modelo... aguarde.")
-
+print(f"Carregando o modelo de {CAMINHO_MODELO}...")
+print("Nota: Na primeira vez, isso pode demorar alguns minutos pois fará o download (1GB).")
 
 try:
+    # A biblioteca vai baixar os arquivos do Hugging Face automaticamente e colocar em cache
     classificador_ia = pipeline(task="text-classification", model=CAMINHO_MODELO, tokenizer=CAMINHO_MODELO)
-    print("Modelo de Classificação carregado com sucesso!")
+    print("Modelo de Classificação carregado com sucesso da nuvem!")
 except Exception as e:
     print(f"Erro fatal ao carregar o modelo: {e}")
     classificador_ia = None
@@ -41,7 +43,7 @@ def analisar_comentario(dados: ComentarioInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro no processamento da IA: {str(e)}")
 
-# --- INTERFACE CHAT COM DESCRIÇÃO (FRONTEND) ---
+# --- INTERFACE CHAT (FRONTEND) ---
 @app.get("/", response_class=HTMLResponse)
 def home():
     html_content = """
@@ -74,7 +76,6 @@ def home():
                 box-sizing: border-box;
             }
 
-            /* --- ÁREA DE DESCRIÇÃO --- */
             .intro-section {
                 text-align: center;
                 max-width: 600px;
@@ -115,7 +116,6 @@ def home():
                 border: 1px solid transparent;
             }
 
-            /* Cores dos dots na legenda */
             .dot-legend { width: 8px; height: 8px; border-radius: 50%; }
             
             .l-hate { color: #9b1c1c; border-color: #fde8e8; } .l-hate .dot-legend { background: #c81e1e; }
@@ -123,8 +123,6 @@ def home():
             .l-spam { color: #854d0e; border-color: #fef08a; } .l-spam .dot-legend { background: #ca8a04; }
             .l-neither { color: #046c4e; border-color: #def7ec; } .l-neither .dot-legend { background: #31c48d; }
 
-
-            /* --- CONTAINER DO CHAT --- */
             .chat-container {
                 width: 100%;
                 max-width: 500px;
@@ -134,7 +132,7 @@ def home():
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
                 border-radius: 16px;
                 overflow: hidden;
-                height: 600px; /* Altura fixa para o chat */
+                height: 600px;
                 max-height: 70vh;
                 border: 1px solid var(--border-color);
             }
@@ -193,7 +191,6 @@ def home():
                 letter-spacing: 0.3px;
             }
 
-            /* Estilos das Tags no Chat */
             .tag-hate { background: #fde8e8; color: #9b1c1c; }
             .tag-offensive { background: #fff7ed; color: #9a3412; }
             .tag-spam { background: #fefce8; color: #854d0e; }
@@ -297,7 +294,7 @@ def home():
                 if (!texto) return;
 
                 if (isFirstMessage) {
-                    messagesArea.innerHTML = ''; // Limpa o placeholder inicial
+                    messagesArea.innerHTML = ''; 
                     isFirstMessage = false;
                 }
 
@@ -346,7 +343,6 @@ def home():
                 const label = labelOriginal.toLowerCase();
                 const porcentagem = (score * 100).toFixed(0) + '%';
 
-                // AJUSTE SE NECESSÁRIO CONFORME O RETORNO DO SEU MODELO
                 if (label.includes("hate") || label === "label_1") {
                     info = { nome: "Discurso de Ódio", css: "tag-hate" };
                 } else if (label.includes("offensive") || label === "label_2") {
@@ -369,12 +365,6 @@ def home():
                 }
             }
         </script>
-        </br>
-        </br>
-        </br>
-        </br>
-        </br>
-
     </body>
     </html>
     """
